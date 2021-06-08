@@ -17,7 +17,11 @@ class TaskController extends Controller
      */
     public function index()
     {
-        //
+//  $tasks = Task::find(1)->project;
+//         dd($tasks);
+        $tasks = Task::paginate('5');
+        return view('task.index',compact('tasks'));
+
     }
 
     /**
@@ -27,7 +31,7 @@ class TaskController extends Controller
      */
     public function create()
     {
-        //
+        return view('task.create');
     }
 
     /**
@@ -38,7 +42,27 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required|max:255',
+            'detail' => 'required|max:255',
+            'user_id'=> 'required|integer',
+            'project_id'=> 'required | integer',
+
+
+
+        ]);
+
+
+        $task=new Task();
+        $task->title=$title;
+        $task->detail= $detail;
+        //$task->project_id = ;
+        $task->user_id = Auth::user()->id;
+        $task->save();
+
+        return redirect(route('tasks.index'))->with('status','Your new task has been created succesfully!');
+
+
     }
 
     /**
@@ -49,7 +73,11 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        //
+        return view('task.single-task', compact('task'));
+
+        // pass a variable to get project id
+
+
     }
 
     /**
@@ -60,7 +88,7 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        //
+        return view('task.edit',compact('task'));
     }
 
     /**
@@ -72,7 +100,27 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required|max:255',
+            'detail' => 'required|max:255',
+            'user_id'=> 'required|integer',
+            'project_id'=> 'required | integer',
+
+
+        ]);
+
+
+        $task=new Task();
+        $task->title=$title;
+        $task->detail= $detail;
+      //  $task->project_id = ;
+        $task->user_id = Auth::user()->id;
+        $task->save();
+
+        return redirect(route('tasks.index'))->with('status','Your new task has been created succesfully!');
+
+
+
     }
 
     /**
@@ -83,6 +131,8 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
+        $project->delete();
+
+        return redirect(route('tasks.index'))->with('status','task deleted successfully!');
     }
 }
