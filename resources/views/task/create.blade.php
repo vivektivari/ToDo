@@ -3,7 +3,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Dashboard') }}
         </h2>
-    </x-slot> 
+    </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -12,7 +12,7 @@
                    Add A New Task
                 </div>
             </div>
-            
+
         </div>
     </div>
 
@@ -23,13 +23,13 @@
 
 
       <div class="relative mb-4">
-      <form method="POST" action="{{route('tasks.store')}}" enctype="multipart/form-data">  
-      
-      @csrf    
-      
+      <form method="POST" action="{{route('tasks.store')}}" enctype="multipart/form-data">
+
+      @csrf
+
         <label class="leading-7 text-sm text-gray-600">Project Title</label>
         <input type="text" id="title" name="title" class="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-       
+
       </div> <span style="color:red;">    @error('title')
         {{$message}}
         @enderror </span><br><br>
@@ -40,7 +40,7 @@
       <span style="color:red;">
       @error('detail')
         {{$message}}
-        @enderror 
+        @enderror
         </span><br> <br>
       <div class="relative mb-4">
         <label  class="leading-7 text-sm text-gray-600">Featured Image</label>
@@ -48,7 +48,7 @@
       </div><span style="color:red;"> @error('image')
         {{$message}}
         @enderror </span><br><br>
-      
+
       <button class="text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">Add A Task</button>
       </form>
   </div>

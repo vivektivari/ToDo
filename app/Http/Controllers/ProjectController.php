@@ -43,18 +43,18 @@ class ProjectController extends Controller
             'title' => 'required|max:255',
             'detail' => 'required|max:255',
             'image'=>'required|image|mimes:png,jpg|max:2048',
-           
-            
-        ]); 
 
-         
+
+        ]);
+
+
         $title = $request->title;
         $detail = $request->detail;
         $imgName =  $request->file('image');
         $new_img_name = rand() . '.' . $imgName->getClientOriginalExtension();
         $imgName->storeAs('public/images', $new_img_name);
 
-        
+
 
         $project=new Project();
         $project->title=$title;
@@ -62,10 +62,10 @@ class ProjectController extends Controller
         $project->image= $new_img_name;
         $project->user_id = Auth::user()->id;
         $project->save();
-        
+
         return redirect(route('projects.index'))->with('status','Your new project has been created succesfully!');
 
-    
+
     }
 
     /**
@@ -76,7 +76,10 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-      return view('project.single-project', compact('project'));
+        $tasks = Project::find(1)->task;
+       // dd($tasks);
+      return view('project.single-project', compact('project' ,'tasks'));
+
     }
 
     /**
@@ -103,11 +106,11 @@ class ProjectController extends Controller
             'title' => 'required|max:255',
             'detail' => 'required|max:255',
             'image'=>'required|image|mimes:png,jpg|max:2048',
-           
-            
-        ]); 
 
-         
+
+        ]);
+
+
         $title = $request->title;
         $detail = $request->detail;
         $imgName =  $request->file('image');
@@ -123,7 +126,7 @@ class ProjectController extends Controller
         $project->image= $new_img_name;
         $project->user_id = Auth::user()->id;
         $project->save();
-        
+
         return redirect(route('projects.index'))->with('status','Your new project has been updated succesfully!');
     }
 
@@ -136,7 +139,7 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
        $img= $project->image;
-      
+
 
         $project->delete();
         Storage::delete('public/images/'.$img);
