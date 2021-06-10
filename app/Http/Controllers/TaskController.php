@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-
-
 
 class TaskController extends Controller
 {
@@ -17,10 +16,8 @@ class TaskController extends Controller
      */
     public function index()
     {
-//  $tasks = Task::find(1)->project;
-//         dd($tasks);
-        $tasks = Task::paginate('5');
-        return view('task.index',compact('tasks'));
+        $tasks = Task::all();
+        return view('task.index', compact('tasks'));
 
     }
 
@@ -29,9 +26,11 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $pid)
     {
-        return view('task.create');
+        // dd($pid->project_id);
+        $project_id = $pid->project_id;
+        return view('task.create', compact('project_id'));
     }
 
     /**
@@ -42,26 +41,23 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        //
+
         $validated = $request->validate([
             'title' => 'required|max:255',
             'detail' => 'required|max:255',
-            'user_id'=> 'required|integer',
-            'project_id'=> 'required | integer',
-
-
+            'project_id' => 'required|integer',
 
         ]);
 
-
-        $task=new Task();
-        $task->title=$title;
-        $task->detail= $detail;
-        //$task->project_id = ;
+        $task = new Task();
+        $task->title = $request->title;
+        $task->detail = $request->detail;
+        $task->project_id = $request->project_id;
         $task->user_id = Auth::user()->id;
         $task->save();
 
-        return redirect(route('tasks.index'))->with('status','Your new task has been created succesfully!');
-
+        return redirect(route('projects.show', $request->project_id))->with('status', 'Your new task has been created succesfully!');
 
     }
 
@@ -73,7 +69,8 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        return view('task.single-task', compact('task'));
+        $project_id = $task->project_id;
+        return view('task.single-task', compact('task', 'project_id'));
     }
 
     /**
@@ -82,9 +79,10 @@ class TaskController extends Controller
      * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function edit(Task $task)
+    public function edit(Task $task, Request $req)
     {
-        return view('task.edit',compact('task'));
+
+        return view('task.edit', compact('task'));
     }
 
     /**
@@ -99,23 +97,13 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|max:255',
             'detail' => 'required|max:255',
-            'user_id'=> 'required|integer',
-            'project_id'=> 'required | integer',
-
-
         ]);
 
-
-        $task=new Task();
-        $task->title=$title;
-        $task->detail= $detail;
-      //  $task->project_id = ;
-        $task->user_id = Auth::user()->id;
+        $task->title = $request->title;
+        $task->detail = $request->detail;
         $task->save();
 
-        return redirect(route('tasks.index'))->with('status','Your new task has been created succesfully!');
-
-
+        return redirect(route('projects.show', $task->project_id))->with('status', 'Your new task has been updated succesfully!');
 
     }
 
@@ -127,8 +115,9 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        $project->delete();
+        $pid = $task->project_id;
+        $task->delete();
 
-        return redirect(route('tasks.index'))->with('status','task deleted successfully!');
+        return redirect(route('projects.show', $pid))->with('status', 'Task deleted successfully!');
     }
 }
