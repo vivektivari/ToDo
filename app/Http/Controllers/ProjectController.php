@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-
 
 class ProjectController extends Controller
 {
@@ -17,8 +16,8 @@ class ProjectController extends Controller
      */
     public function index()
     {
-         $projects = Project::paginate('5');
-         return view('project.index',compact('projects'));
+        $projects = Project::paginate('5');
+        return view('project.index', compact('projects'));
     }
 
     /**
@@ -42,29 +41,24 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'title' => 'required|max:255',
             'detail' => 'required|max:255',
-            'image'=>'required|image|mimes:png,jpg|max:2048',
-
+            'image' => 'required|image|mimes:png,jpg|max:2048',
 
         ]);
 
-
         $title = $request->title;
         $detail = $request->detail;
-        $imgName =  $request->file('image');
+        $imgName = $request->file('image');
         $new_img_name = rand() . '.' . $imgName->getClientOriginalExtension();
         $imgName->storeAs('public/images', $new_img_name);
 
-
-
-        $project=new Project();
-        $project->title=$title;
-        $project->detail= $detail;
-        $project->image= $new_img_name;
+        $project = new Project();
+        $project->title = $title;
+        $project->detail = $detail;
+        $project->image = $new_img_name;
         $project->user_id = Auth::user()->id;
         $project->save();
 
-        return redirect(route('projects.index'))->with('status','Your new project has been created succesfully!');
-
+        return redirect(route('projects.index'))->with('status', 'Your new project has been created succesfully!');
 
     }
 
@@ -76,9 +70,10 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        $tasks = Project::find(1)->task;
-       // dd($tasks);
-      return view('project.single-project', compact('project' ,'tasks'));
+        $tasks = $project->task->where('project_id', $project->id);
+        $project_id = $project->id;
+        //dd($tasks);
+        return view('project.single-project', compact('project', 'tasks', 'project_id'));
 
     }
 
@@ -90,7 +85,7 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        return view('project.edit',compact('project'));
+        return view('project.edit', compact('project'));
     }
 
     /**
@@ -105,29 +100,25 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'title' => 'required|max:255',
             'detail' => 'required|max:255',
-            'image'=>'required|image|mimes:png,jpg|max:2048',
-
+            'image' => 'required|image|mimes:png,jpg|max:2048',
 
         ]);
 
-
         $title = $request->title;
         $detail = $request->detail;
-        $imgName =  $request->file('image');
+        $imgName = $request->file('image');
         $new_img_name = rand() . '.' . $imgName->getClientOriginalExtension();
         $imgName->storeAs('public/images', $new_img_name);
 
+        Storage::delete('public/images/' . $project->image);
 
-        Storage::delete('public/images/'.$project->image);
-
-
-        $project->title=$title;
-        $project->detail= $detail;
-        $project->image= $new_img_name;
+        $project->title = $title;
+        $project->detail = $detail;
+        $project->image = $new_img_name;
         $project->user_id = Auth::user()->id;
         $project->save();
 
-        return redirect(route('projects.index'))->with('status','Your new project has been updated succesfully!');
+        return redirect(route('projects.index'))->with('status', 'Your new project has been updated succesfully!');
     }
 
     /**
@@ -138,11 +129,10 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-       $img= $project->image;
-
+        $img = $project->image;
 
         $project->delete();
-        Storage::delete('public/images/'.$img);
-        return redirect(route('projects.index'))->with('status','Post deleted successfully!');
+        Storage::delete('public/images/' . $img);
+        return redirect(route('projects.index'))->with('status', 'Post deleted successfully!');
     }
 }
