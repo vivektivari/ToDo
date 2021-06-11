@@ -16,7 +16,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::paginate('5');
+        $projects = Project::where('user_id', Auth::user()->id)->paginate('5');
         return view('project.index', compact('projects'));
     }
 
@@ -70,10 +70,17 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        $tasks = $project->task->where('project_id', $project->id);
-        $project_id = $project->id;
-        //dd($tasks);
-        return view('project.single-project', compact('project', 'tasks', 'project_id'));
+
+        if ($project->user_id !== Auth::user()->id) {
+            return "OOPS, You are not authorized!";
+        } else {
+            $tasks = $project->task
+                ->where('user_id', Auth::user()->id)
+                ->where('project_id', $project->id);
+            $project_id = $project->id;
+            //dd($tasks);
+            return view('project.single-project', compact('project', 'tasks', 'project_id'));
+        }
 
     }
 
@@ -85,7 +92,12 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        return view('project.edit', compact('project'));
+        if ($project->user_id !== Auth::user()->id) {
+            return "OOPS, You are not authorized to access this project!";
+        } else {
+            return view('project.edit', compact('project'));
+        }
+
     }
 
     /**
@@ -97,28 +109,31 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        $validated = $request->validate([
-            'title' => 'required|max:255',
-            'detail' => 'required|max:255',
-            'image' => 'required|image|mimes:png,jpg|max:2048',
+        if ($project->user_id !== Auth::user()->id) {
+            return "You are not authorized to update this project";
+        } else {
+            $validated = $request->validate([
+                'title' => 'required|max:255',
+                'detail' => 'required|max:255',
+                'image' => 'required|image|mimes:png,jpg|max:2048',
 
-        ]);
+            ]);
 
-        $title = $request->title;
-        $detail = $request->detail;
-        $imgName = $request->file('image');
-        $new_img_name = rand() . '.' . $imgName->getClientOriginalExtension();
-        $imgName->storeAs('public/images', $new_img_name);
+            $title = $request->title;
+            $detail = $request->detail;
+            $imgName = $request->file('image');
+            $new_img_name = rand() . '.' . $imgName->getClientOriginalExtension();
+            $imgName->storeAs('public/images', $new_img_name);
 
-        Storage::delete('public/images/' . $project->image);
+            Storage::delete('public/images/' . $project->image);
 
-        $project->title = $title;
-        $project->detail = $detail;
-        $project->image = $new_img_name;
-        $project->user_id = Auth::user()->id;
-        $project->save();
+            $project->title = $title;
+            $project->detail = $detail;
+            $project->image = $new_img_name;
+            $project->save();
 
-        return redirect(route('projects.index'))->with('status', 'Your new project has been updated succesfully!');
+            return redirect(route('projects.index'))->with('status', 'Your new project has been updated succesfully!');
+        }
     }
 
     /**
@@ -129,10 +144,15 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        $img = $project->image;
 
-        $project->delete();
-        Storage::delete('public/images/' . $img);
-        return redirect(route('projects.index'))->with('status', 'Post deleted successfully!');
+        if ($project->user_id !== Auth::user()->id) {
+            return "You are not authorized";
+        } else {
+            $img = $project->image;
+
+            $project->delete();
+            Storage::delete('public/images/' . $img);
+            return redirect(route('projects.index'))->with('status', 'Post deleted successfully!');
+        }
     }
 }
