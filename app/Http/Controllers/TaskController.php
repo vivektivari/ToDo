@@ -16,7 +16,7 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = Task::all();
+        $tasks = Task::where('user_id', Auth::user()->id)->get();
         return view('task.index', compact('tasks'));
 
     }
@@ -42,7 +42,6 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         //
-
         $validated = $request->validate([
             'title' => 'required|max:255',
             'detail' => 'required|max:255',
@@ -69,8 +68,12 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        $project_id = $task->project_id;
-        return view('task.single-task', compact('task', 'project_id'));
+        if ($task->user_id !== Auth::user()->id) {
+            return "You are not authorized";
+        } else {
+            $project_id = $task->project_id;
+            return view('task.single-task', compact('task', 'project_id'));
+        }
     }
 
     /**
@@ -81,8 +84,11 @@ class TaskController extends Controller
      */
     public function edit(Task $task, Request $req)
     {
-
-        return view('task.edit', compact('task'));
+        if ($task->user_id !== Auth::user()->id) {
+            return "You are not authorized";
+        } else {
+            return view('task.edit', compact('task'));
+        }
     }
 
     /**
@@ -94,16 +100,20 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        $validated = $request->validate([
-            'title' => 'required|max:255',
-            'detail' => 'required|max:255',
-        ]);
+        if ($task->user_id !== Auth::user()->id) {
+            return "You are not authorized";
+        } else {
+            $validated = $request->validate([
+                'title' => 'required|max:255',
+                'detail' => 'required|max:255',
+            ]);
 
-        $task->title = $request->title;
-        $task->detail = $request->detail;
-        $task->save();
+            $task->title = $request->title;
+            $task->detail = $request->detail;
+            $task->save();
 
-        return redirect(route('projects.show', $task->project_id))->with('status', 'Your new task has been updated succesfully!');
+            return redirect(route('projects.show', $task->project_id))->with('status', 'Your new task has been updated succesfully!');
+        }
 
     }
 
@@ -115,9 +125,13 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        $pid = $task->project_id;
-        $task->delete();
+        if ($task->user_id !== Auth::user()->id) {
+            return "You are not authorized";
+        } else {
+            $pid = $task->project_id;
+            $task->delete();
 
-        return redirect(route('projects.show', $pid))->with('status', 'Task deleted successfully!');
+            return redirect(route('projects.show', $pid))->with('status', 'Task deleted successfully!');
+        }
     }
 }
